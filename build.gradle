@@ -1,0 +1,31 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.7.22'
+}
+
+group = 'com.github.srain3'
+version = '0.1.5'
+
+repositories {
+    mavenCentral()
+    maven { url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+    //maven { url "https://repo.dmulloy2.net/repository/public/" }
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.7.22'
+    compileOnly "org.spigotmc:spigot-api:1.19.3-R0.1-SNAPSHOT"
+    //compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "5.0.0-SNAPSHOT"
+    compileOnly(fileTree(dir: 'libs', include: ['floodgate-spigot.jar']))
+    compileOnly(fileTree(dir: 'libs', include: ['Geyser-Spigot.jar']))
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = '17'
+    //kotlinOptions.noStdlib = false
+}
+
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

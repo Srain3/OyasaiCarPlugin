@@ -1,0 +1,13 @@
+name: OyasaiCarPlugin
+author: Srain3
+main: com.github.srain3.rr.RealRacing
+api-version: 1.19
+version: "0.1.5"
+
+depend:
+  - floodgate
+  - Geyser-Spigot
+
+commands:
+  machine:
+    description: "Machine command"
