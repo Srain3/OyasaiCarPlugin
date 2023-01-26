@@ -1,5 +1,6 @@
 package com.github.srain3.rr.car
 
+import org.bukkit.entity.Boat
 import org.bukkit.entity.Item
 import org.bukkit.entity.Minecart
 import org.bukkit.util.Vector
@@ -155,7 +156,7 @@ data class VehicleCar(
     fun jump(dropItem: Item, minecart: Minecart): Double {
         if (speed.z <= 0.1) return 0.0
 
-        val selectVec = Vector(0.0,0.0,1.0).rotateAroundY(-PI /180*(minecart.location.yaw+90F))
+        val selectVec = Vector(0.0,0.0,1.0).rotateAroundY(-PI /180*(minecart.location.yaw+90F+slipAngle))
 
         val rtb = dropItem.world.rayTraceBlocks(dropItem.location, selectVec, 2.0) ?: return 0.0
         val hitBlock = rtb.hitBlock ?: return 0.0
@@ -182,5 +183,22 @@ data class VehicleCar(
         //if (minecart.velocity.x in -0.02..0.02 && minecart.velocity.z in -0.02..0.02) return -0.525
 
         return 0.0
+    }
+
+    /**
+     * スリップストリームの処理
+     */
+    fun slipstream(minecart: Minecart): Boolean {
+        if (speed.z <= 0.1) return false
+        val loc = minecart.location.clone()
+        val vec = Vector(0.0,0.0,3.65).rotateAroundY(-PI /180*(minecart.location.yaw+90F+slipAngle))
+        loc.world?.rayTraceEntities(loc.add(vec), vec, ((speed.z + 0.01) * 7.5), 2.0) {
+            it is Boat || it is Minecart
+        } ?: return false
+        speed.z += 0.001
+        if (speed.z >= speedLimit) {
+            speed.z = speedLimit
+        }
+        return true
     }
 }

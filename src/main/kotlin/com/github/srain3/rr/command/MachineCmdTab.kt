@@ -86,13 +86,13 @@ object MachineCmdTab: TabCompleter {
             6 -> {
                 return when (args[0]) {
                     "give" -> {
-                        mutableListOf("Handling(1～899)")
+                        mutableListOf("Handling(1～150)")
                     }
                     "giveTuning" -> {
                         mutableListOf("[Momentum]")
                     }
                     "set" -> {
-                        mutableListOf("Handling(1～899)")
+                        mutableListOf("Handling(1～150)")
                     }
                     else -> {
                         null

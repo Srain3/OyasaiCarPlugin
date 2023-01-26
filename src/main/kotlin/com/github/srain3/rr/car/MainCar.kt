@@ -5,8 +5,13 @@ import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.Client
 import org.bukkit.*
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BossBar
-import org.bukkit.entity.*
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.Item
+import org.bukkit.entity.Minecart
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import org.geysermc.floodgate.api.FloodgateApi
@@ -14,6 +19,7 @@ import org.geysermc.geyser.GeyserImpl
 import org.geysermc.geyser.translator.protocol.java.entity.JavaMoveVehicleTranslator
 import kotlin.math.PI
 import kotlin.math.absoluteValue
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 // MEMO: トロッコ->プレイヤーは+90F プレイヤー->トロッコは-90F 左にトロッコの視線(F3+B)が来るのが正面向き
@@ -113,6 +119,8 @@ data class MainCar(
                 val wasd = getWASD(player)
                 //player.sendMessage(wasd)
 
+                updateBar(vehicleCar.slipstream(minecart))
+
                 val speed = vehicleCar.controlSpeed(wasd)
                 val addYaw = vehicleCar.handling(wasd)
                 val yaw = minecart.location.yaw + addYaw
@@ -134,6 +142,9 @@ data class MainCar(
                     dropItem.velocity = Vector()
                 }
                 dropItem.velocity = addVec
+
+                updateHeadLight(player)
+                smokeParticle(vehicleCar.speed.z, vehicleCar.slipAngle)
 
                 if (FloodgateApi.getInstance().isFloodgateId(player.uniqueId)) {
                     bedRockConvert(player, addYaw)
@@ -243,15 +254,39 @@ data class MainCar(
     }
 
     /**
+     * タイヤスモーク(っぽいやつ)の処理
+     */
+    private fun smokeParticle(speed: Double, slipAngle: Float) {
+        if (slipAngle.absoluteValue >= 24.5F) {
+            if (speed <= 0.1) return
+            val speedToCount = (speed * 0.025).roundToInt()
+            val angleToCount = (0.0001F + slipAngle.absoluteValue * 0.0625).roundToInt()
+            Particle.DustOptions(
+                Color.SILVER, 1F+ min((speed + 0.001) * 0.5, 1.0).toFloat())
+            minecart.world.spawnParticle(
+                Particle.REDSTONE,
+                minecart.location,
+                (speedToCount+angleToCount),
+                (0..10).random()*0.1,
+            (0..4).random()*0.1,
+            (0..10).random()*0.1,
+                Particle.DustOptions(
+                    Color.SILVER, 0.25F+ min((speed + 0.001) * 3.0, 1.5).toFloat()
+                )
+            )
+        }
+    }
+
+    /**
      * ボスバーの更新
      */
-    private fun updateBar() {
+    private fun updateBar(slipstreamSwitch: Boolean = false) {
         if(vehicleCar.speed.z.isNaN()) {
             vehicleCar.speed = Vector()
         }
         val barPercent = vehicleCar.speed.z / vehicleCar.speedLimit
         var speedString = (vehicleCar.speed.z * 100).roundToInt().toString()
-        if (barPercent in -0.05..0.05) {
+        if (barPercent in -0.1..0.1) {
             bossBar.color = BarColor.WHITE
             speedString = "&r&l${speedString}&rkm/h"
         } else if (barPercent > 0.05) {
@@ -262,6 +297,10 @@ data class MainCar(
             speedString = "&c&l${speedString}&r&ckm/h"
         }
         bossBar.progress = barPercent.absoluteValue
+
+        if (slipstreamSwitch) {
+            bossBar.color = BarColor.YELLOW
+        }
 
         bossBar.setTitle(ToolBox.colorMessage("| $speedString &r|"))
     }
@@ -276,6 +315,21 @@ data class MainCar(
             }
         } else {
             bossBar.removeAll()
+        }
+    }
+
+    /**
+     * ヘッドライト(暗視効果)の更新
+     */
+    private fun updateHeadLight(player: Player) {
+        if (player.location.clone().apply { y += 0.75 }.block.lightFromSky < 3 && player.location.clone().apply { y += 0.75 }.block.lightFromBlocks < 1) {
+            if (player.hasPotionEffect(PotionEffectType.NIGHT_VISION)) {
+                if (player.getPotionEffect(PotionEffectType.NIGHT_VISION)!!.duration <= 4) {
+                    player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 4, 0, false, false, false))
+                }
+            } else {
+                player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 4, 0, false, false, false))
+            }
         }
     }
 

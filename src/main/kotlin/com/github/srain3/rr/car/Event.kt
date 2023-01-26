@@ -131,8 +131,8 @@ object Event: Listener {
         if (slipInt >150) {
             slipInt = 150
         }
-        if (handlingInt > 899) {
-            handlingInt = 899
+        if (handlingInt > 150) {
+            handlingInt = 150
         }
 
         return mutableListOf(topSpeedInt,powerInt,brakeInt,slipInt,handlingInt)
