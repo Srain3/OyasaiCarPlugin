@@ -1,5 +1,6 @@
 package com.github.srain3.rr.car
 
+import org.bukkit.entity.Item
 import org.bukkit.entity.Minecart
 import org.bukkit.util.Vector
 import kotlin.math.PI
@@ -151,10 +152,12 @@ data class VehicleCar(
     /**
      * 段差で登らせる
      */
-    fun jump(minecart: Minecart): Double {
+    fun jump(dropItem: Item, minecart: Minecart): Double {
+        if (speed.z <= 0.1) return 0.0
+
         val selectVec = Vector(0.0,0.0,1.0).rotateAroundY(-PI /180*(minecart.location.yaw+90F))
 
-        val rtb = minecart.world.rayTraceBlocks(minecart.location, selectVec, 2.0) ?: return 0.0
+        val rtb = dropItem.world.rayTraceBlocks(dropItem.location, selectVec, 2.0) ?: return 0.0
         val hitBlock = rtb.hitBlock ?: return 0.0
 
         if (hitBlock.isPassable) return 0.0
@@ -162,18 +165,17 @@ data class VehicleCar(
         if (!upBlock.isEmpty) {
             if (!upBlock.isPassable) return 0.0
         }
-        //if (minecart.velocity.x in -0.02..0.02 && minecart.velocity.z in -0.02..0.02) return 0.0
 
-        return 0.875
+        return 0.45 * (1 + (speed.z * 0.25))
     }
 
     /**
      * 落下処理
      */
-    fun down(minecart: Minecart): Double {
+    fun down(dropItem: Item): Double {
         val selectVec = Vector(0.0,-1.0,0.0)
 
-        val rtb = minecart.world.rayTraceBlocks(minecart.location, selectVec, 0.5) ?: return -0.525
+        val rtb = dropItem.world.rayTraceBlocks(dropItem.location, selectVec, 0.07) ?: return -0.525
         val hitBlock = rtb.hitBlock ?: return -0.525
 
         if (hitBlock.isPassable) return -0.525

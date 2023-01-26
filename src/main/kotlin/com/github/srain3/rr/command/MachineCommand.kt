@@ -137,11 +137,11 @@ object MachineCommand: CommandExecutor {
                     when (sender) {
                         is BlockCommandSender -> {
                             val addVec = Vector(0.0,0.0,1.0).rotateAroundY(PI/180.0*(yaw))
-                            Event.spawnCar(sender.block.location.add(0.5,2.0,0.5).add(addVec), minecartItem, yaw)
+                            Event.spawnCar(sender.block.location.add(0.5,2.07,0.5).add(addVec), minecartItem, yaw, null)
                             sender.sendMessage("[Machine] 車を出しました")
                         }
                         is Player -> {
-                            Event.spawnCar(sender.location.add(0.5,0.0,0.5), minecartItem, sender.eyeLocation.yaw)
+                            Event.spawnCar(sender.location.add(0.5,0.07,0.5), minecartItem, sender.eyeLocation.yaw, null)
                             sender.sendMessage("[Machine] 車を出しました")
                         }
                         else -> {

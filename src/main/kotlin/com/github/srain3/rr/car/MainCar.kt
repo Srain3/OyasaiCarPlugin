@@ -68,7 +68,7 @@ data class MainCar(
                 }
 
                 if (dropItem.isDead) {
-                    val newEntity = minecart.world.spawnEntity(minecart.location.apply { y += 1.55 }, EntityType.DROPPED_ITEM) as Item
+                    val newEntity = minecart.world.spawnEntity(minecart.location, EntityType.DROPPED_ITEM) as Item
                     newEntity.itemStack = ItemStack(Material.SNOWBALL)
                     newEntity.setGravity(false)
                     newEntity.pickupDelay = Int.MAX_VALUE
@@ -87,9 +87,9 @@ data class MainCar(
                     val speed = vehicleCar.controlSpeed(null)
                     val addVec = speed.rotateAroundY(PI/180.0*-(minecart.location.yaw+90F))
 
-                    var jumpY = vehicleCar.jump(minecart)
+                    var jumpY = vehicleCar.jump(dropItem, minecart)
                     if (jumpY == 0.0) {
-                        jumpY = vehicleCar.down(minecart)
+                        jumpY = vehicleCar.down(dropItem)
                     }
                     if (jumpY != 0.0) {
                         addVec.y = jumpY
@@ -123,9 +123,9 @@ data class MainCar(
                 //snowBall.velocity = speed.rotateAroundY(PI/180.0*-(yaw + 90F + vehicleCar.slip(wasd)))
                 val addVec = speed.rotateAroundY(PI/180.0*-(yaw + 90F + vehicleCar.slip(wasd)))
 
-                var jumpY = vehicleCar.jump(minecart)
+                var jumpY = vehicleCar.jump(dropItem, minecart)
                 if (jumpY == 0.0) {
-                    jumpY = vehicleCar.down(minecart)
+                    jumpY = vehicleCar.down(dropItem)
                 }
                 if (jumpY != 0.0) {
                     addVec.y = jumpY
