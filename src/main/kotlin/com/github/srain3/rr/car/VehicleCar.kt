@@ -51,7 +51,7 @@ data class VehicleCar(
             }
             null -> { //無乗車(NoPlayer)
                 addSpeed.zero()
-                speed.multiply(0.975)
+                speed.multiply(0.625)
                 if (speed.z in -0.03..0.03) {
                     speed.z = 0.0
                 }

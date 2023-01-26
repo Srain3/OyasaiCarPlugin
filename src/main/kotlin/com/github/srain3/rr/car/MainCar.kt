@@ -285,9 +285,9 @@ data class MainCar(
     private fun bedRockConvert(player: Player, yaw: Float) {
         val session = GeyserImpl.getInstance().connectionByUuid(player.uniqueId)
         if (session != null) {
-            val x = minecart.location.x
-            val y = minecart.location.y
-            val z = minecart.location.z
+            val x = dropItem.location.x + (dropItem.velocity.x * 3)
+            val y = minecart.location.y + (dropItem.velocity.y * 3)
+            val z = dropItem.location.z + (dropItem.velocity.z * 3)
             val pitch = minecart.location.pitch
 
             val bedrockBoat = session.entityCache.getEntityByJavaId(minecart.entityId)
