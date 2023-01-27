@@ -164,10 +164,12 @@ data class MainCar(
         if (owner != null) {
             if (owner.isOnline) {
                 owner.inventory.addItem(item)
+                //Bukkit.getLogger().info("exitTask:Online")
             } else {
                 val itemList = Event.offlineFixList[owner.uniqueId] ?: mutableListOf()
                 itemList.add(item)
                 Event.offlineFixList[owner.uniqueId] = itemList
+                //Bukkit.getLogger().info("exitTask:null")
             }
         }
         Event.mainCarList.remove(this@MainCar)
@@ -176,7 +178,7 @@ data class MainCar(
     /**
      * コントロールプレイヤー取得
      */
-    private fun getControlPlayer(): Player? {
+    fun getControlPlayer(): Player? {
         return minecart.passengers.filterIsInstance<Player>().firstOrNull()
     }
 

@@ -16,6 +16,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.ProjectileHitEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
@@ -194,5 +195,15 @@ object Event: Listener {
             event.isCancelled = true
             event.entity.setBounce(true)
         }
+    }
+
+    /**
+     * 壁に当たるダメージ軽減
+     */
+    @EventHandler
+    fun wallDamageCancel(event: EntityDamageEvent) {
+        if (event.entity !is Player) return
+        if (!mainCarList.any { it.getControlPlayer()?.uniqueId == event.entity.uniqueId }) return
+        event.isCancelled = true
     }
 }
