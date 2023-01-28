@@ -202,6 +202,8 @@ object Event: Listener {
      */
     @EventHandler
     fun wallDamageCancel(event: EntityDamageEvent) {
+        if (!(event.cause == EntityDamageEvent.DamageCause.FALL ||
+            event.cause == EntityDamageEvent.DamageCause.SUFFOCATION)) return
         if (event.entity !is Player) return
         if (!mainCarList.any { it.getControlPlayer()?.uniqueId == event.entity.uniqueId }) return
         event.isCancelled = true

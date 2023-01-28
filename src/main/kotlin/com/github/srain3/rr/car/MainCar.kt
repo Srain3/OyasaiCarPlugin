@@ -163,7 +163,7 @@ data class MainCar(
         minecart.remove() ; dropItem.remove()
         if (owner != null) {
             if (owner.isOnline) {
-                owner.inventory.addItem(item)
+                Bukkit.getPlayer(owner.uniqueId)!!.inventory.addItem(item)
                 //Bukkit.getLogger().info("exitTask:Online")
             } else {
                 val itemList = Event.offlineFixList[owner.uniqueId] ?: mutableListOf()
