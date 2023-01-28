@@ -1,6 +1,7 @@
 package com.github.srain3.rr
 
 import com.github.srain3.rr.car.Event
+import com.github.srain3.rr.command.GentukiCommand
 import com.github.srain3.rr.command.MachineCmdTab
 import com.github.srain3.rr.command.MachineCommand
 import com.github.srain3.rr.command.TuningEvent
@@ -16,6 +17,7 @@ class RealRacing : JavaPlugin() {
 
         server.getPluginCommand("machine")?.setExecutor(MachineCommand)
         server.getPluginCommand("machine")?.tabCompleter = MachineCmdTab
+        server.getPluginCommand("gentuki")?.setExecutor(GentukiCommand)
 
         val offlineFixYML = FileBox.getCfg("offlinePlayerFix.yml")
         offlineFixYML.getKeys(false).forEach {
