@@ -30,7 +30,7 @@ object GentukiCommand: CommandExecutor {
         when (sender) {
             is Player -> {
                     Event.spawnCar(sender.location.add(0.5,0.07,0.5), minecartItem, sender.eyeLocation.yaw, null)
-                    sender.sendMessage("[Machine] 原付きを出しました(降りると消えます)")
+                    sender.sendMessage("[Machine] 原付を出しました(降りると消えます)")
                 }
             is ConsoleCommandSender -> {
                 if (args.isNullOrEmpty()) {
@@ -38,7 +38,7 @@ object GentukiCommand: CommandExecutor {
                 } else if (Bukkit.getPlayer(args[0])?.isOnline == true) {
                     val player = Bukkit.getPlayer(args[0]) ?: return false
                     Event.spawnCar(player.location.add(0.5,0.07,0.5), minecartItem, player.eyeLocation.yaw, null)
-                    player.sendMessage("[Machine] 原付きを出しました(降りると消えます)")
+                    player.sendMessage("[Machine] 原付を出しました(降りると消えます)")
                 } else {
                     sender.sendMessage("[Machine] 存在しないプレイヤーです(ConsoleCommand:/gentuki)")
                 }
