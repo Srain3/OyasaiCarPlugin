@@ -252,6 +252,7 @@ data class MainCar(
 
         val data =  when (wasd) {
             "S", "SA", "SD" -> {
+                brakeSmokeParticle()
                 Particle.DustOptions(Color.RED, 1.75F)
             }
             else -> {
@@ -260,6 +261,25 @@ data class MainCar(
         }
         minecart.world.spawnParticle(Particle.REDSTONE,leftLoc,1, data)
         minecart.world.spawnParticle(Particle.REDSTONE,rightLoc,1, data)
+    }
+
+    /**
+     * ブレーキ時に追加のパーティクルを出す処理
+     */
+    private fun brakeSmokeParticle() {
+        driftColor.forEach { color ->
+            minecart.world.spawnParticle(
+                Particle.REDSTONE,
+                minecart.location,
+                2,
+                (0..10).random() * 0.1,
+                (0..4).random() * 0.1,
+                (0..10).random() * 0.1,
+                Particle.DustOptions(
+                    color, 1.25F
+                )
+            )
+        }
     }
 
     /**
