@@ -153,6 +153,29 @@ object MachineCommand: CommandExecutor {
                     sender.sendMessage("[Machine] 引数が違います!")
                 }
             }
+            "driftcolor" -> {
+                // driftcolor color
+                if (sender !is Player) return false
+                val item = sender.inventory.itemInMainHand
+                if (item.type != Material.MINECART) return false
+                val meta = item.itemMeta ?: return false
+                if (!meta.hasCustomModelData()) return false
+                if (meta.customModelData != 831) return false
+
+                if (args.size != 2) return false
+
+                val lore = meta.lore ?: mutableListOf()
+                var oldString = "DriftColor: "
+                lore.filter { Event.driftColorRegex.containsMatchIn(it) }.forEach {
+                    lore.remove(it)
+                    oldString += Event.driftColorRegex.replace(it, "") + ","
+                }
+                lore.add(oldString + args[1])
+
+                meta.lore = lore
+                item.itemMeta = meta
+                sender.sendMessage("[Machine] DriftColorに${args[1]}を追加しました")
+            }
             // DebugOnlyCommand
             "debugCar" -> {
                 // debugCar TopSpeed Power Brake Momentum Yaw

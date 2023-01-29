@@ -1,10 +1,7 @@
 package com.github.srain3.rr.car
 
 import com.github.srain3.rr.ToolBox
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
+import org.bukkit.*
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.Rail
 import org.bukkit.boss.BarColor
@@ -65,7 +62,8 @@ object Event: Listener {
         val bossBar = Bukkit.createBossBar(nameSpacedKey, "| 000km/h |", BarColor.WHITE, BarStyle.SEGMENTED_10)
 
         val vehicleCar = convertCarStatus(getCarStatus(item.itemMeta!!))
-        val mainCar = MainCar(minecart, dropItem, bossBar, nameSpacedKey, vehicleCar, owner, item, debug = debug)
+        val driftColor = getDriftColor(item.itemMeta!!)
+        val mainCar = MainCar(minecart, dropItem, bossBar, nameSpacedKey, vehicleCar, owner, item, debug = debug, driftColor = driftColor)
         mainCarList.add(mainCar)
         mainCar.start()
     }
@@ -78,6 +76,7 @@ object Event: Listener {
     val brakeRegex = Regex("""Brake: [0-9]+(\+*)?""")
     val slipRegex = Regex("""Momentum: [0-9]+(\+*|-*){0,300}""")
     private val handlingRegex = Regex("""Handling: [0-9]+""")
+    val driftColorRegex = Regex("""DriftColor: """)
 
     /**
      * 車のステータス取得
@@ -115,7 +114,7 @@ object Event: Listener {
                 }
             } else if (handlingRegex.matches(line)) {
                 // ハンドリング性
-                val rawStr = line.replace("Handling: ","").toInt()
+                val rawStr = line.replace("Handling: ", "").toInt()
                 handlingInt = rawStr
             }
         }
@@ -137,6 +136,94 @@ object Event: Listener {
         }
 
         return mutableListOf(topSpeedInt,powerInt,brakeInt,slipInt,handlingInt)
+    }
+
+    /**
+     * ドリフトパーティクルの色取得
+     */
+    private fun getDriftColor(meta: ItemMeta): MutableList<Color> {
+        val colorList = mutableListOf<Color>()
+        meta.lore?.forEach { line ->
+            if (driftColorRegex.containsMatchIn(line)) {
+                // ドリフトパーティクルの色
+                val colorStrList = driftColorRegex.replace(line, "").split(',')
+                colorStrList.forEach { colorStr ->
+                    when (colorStr) {
+                        "AQUA" -> {
+                            colorList.add(Color.AQUA)
+                        }
+
+                        "BLACK" -> {
+                            colorList.add(Color.BLACK)
+                        }
+
+                        "BLUE" -> {
+                            colorList.add(Color.BLUE)
+                        }
+
+                        "FUCHSIA" -> {
+                            colorList.add(Color.FUCHSIA)
+                        }
+
+                        "GRAY" -> {
+                            colorList.add(Color.GRAY)
+                        }
+
+                        "GREEN" -> {
+                            colorList.add(Color.GREEN)
+                        }
+
+                        "LIME" -> {
+                            colorList.add(Color.LIME)
+                        }
+
+                        "MAROON" -> {
+                            colorList.add(Color.MAROON)
+                        }
+
+                        "NAVY" -> {
+                            colorList.add(Color.NAVY)
+                        }
+
+                        "OLIVE" -> {
+                            colorList.add(Color.OLIVE)
+                        }
+
+                        "ORANGE" -> {
+                            colorList.add(Color.ORANGE)
+                        }
+
+                        "PURPLE" -> {
+                            colorList.add(Color.PURPLE)
+                        }
+
+                        "RED" -> {
+                            colorList.add(Color.RED)
+                        }
+
+                        "SILVER" -> {
+                            colorList.add(Color.SILVER)
+                        }
+
+                        "TEAL" -> {
+                            colorList.add(Color.TEAL)
+                        }
+
+                        "WHITE" -> {
+                            colorList.add(Color.WHITE)
+                        }
+
+                        "YELLOW" -> {
+                            colorList.add(Color.YELLOW)
+                        }
+                    }
+                }
+            }
+        }
+        if (colorList.size == 0) {
+            colorList.add(Color.SILVER)
+        }
+        return colorList
     }
 
     /**

@@ -39,7 +39,8 @@ data class MainCar(
     var exit: Boolean = false,
     var removeFlag: Boolean = false,
     var deathLoc: Location = Location(null,0.0,0.0,0.0),
-    val debug: Boolean = false
+    val debug: Boolean = false,
+    val driftColor: List<Color> = listOf(Color.SILVER)
 ) {
     /**
      * 開始の処理
@@ -269,19 +270,19 @@ data class MainCar(
             if (speed <= 0.1) return
             val speedToCount = (speed * 0.025).roundToInt()
             val angleToCount = (0.0001F + slipAngle.absoluteValue * 0.0625).roundToInt()
-            Particle.DustOptions(
-                Color.SILVER, 1F+ min((speed + 0.001) * 0.5, 1.0).toFloat())
-            minecart.world.spawnParticle(
-                Particle.REDSTONE,
-                minecart.location,
-                (speedToCount+angleToCount),
-                (0..10).random()*0.1,
-            (0..4).random()*0.1,
-            (0..10).random()*0.1,
-                Particle.DustOptions(
-                    Color.SILVER, 0.25F+ min((speed + 0.001) * 3.0, 1.5).toFloat()
+            driftColor.forEach { color ->
+                minecart.world.spawnParticle(
+                    Particle.REDSTONE,
+                    minecart.location,
+                    (speedToCount + angleToCount),
+                    (0..10).random() * 0.1,
+                    (0..4).random() * 0.1,
+                    (0..10).random() * 0.1,
+                    Particle.DustOptions(
+                        color, 0.25F + min((speed + 0.001) * 3.0, 1.5).toFloat()
+                    )
                 )
-            )
+            }
         }
     }
 
