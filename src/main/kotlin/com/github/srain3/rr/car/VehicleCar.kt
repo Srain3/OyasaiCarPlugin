@@ -25,7 +25,7 @@ data class VehicleCar(
     /**
      * スピード計算
      */
-    fun controlSpeed(wasd: String?): Vector {
+    fun controlSpeed(wasd: String?,slipstream: Boolean = false): Vector {
         //speed.multiply(0.99) // 転がり抵抗
         val addSpeed = Vector(0.0,0.0,0.9)
         when (wasd) {
@@ -69,7 +69,14 @@ data class VehicleCar(
         speed.add(addSpeed)
 
         if (speed.z >= speedLimit) {
-            speed.z = speedLimit
+            if (slipstream) {
+                speed.subtract(addSpeed.clone().multiply(0.1625))
+            } else {
+                speed.subtract(addSpeed.clone().multiply(0.5))
+                if (speed.z >= speedLimit) {
+                    speed.multiply(0.9995)
+                }
+            }
         } else if (speed.z <= -(speedLimit * 0.4)) {
             speed.z = -(speedLimit * 0.4)
         }
@@ -188,17 +195,21 @@ data class VehicleCar(
     /**
      * スリップストリームの処理
      */
-    fun slipstream(minecart: Minecart): Boolean {
+    fun slipstream(minecart: Minecart, debug: Boolean = false): Boolean {
         if (speed.z <= 0.1) return false
+        if (debug) {
+            speed.z += 0.0005
+            return true
+        }
         val loc = minecart.location.clone()
         val vec = Vector(0.0,0.0,3.65).rotateAroundY(-PI /180*(minecart.location.yaw+90F+slipAngle))
-        loc.world?.rayTraceEntities(loc.add(vec), vec, ((speed.z + 0.01) * 7.5), 2.0) {
+        loc.world?.rayTraceEntities(loc.add(vec), vec, ((speed.z + 0.01) * 12.5), 2.0) {
             it is Boat || it is Minecart
         } ?: return false
-        speed.z += 0.001
-        if (speed.z >= speedLimit) {
+        speed.z += 0.0005
+        /*if (speed.z >= speedLimit) {
             speed.z = speedLimit
-        }
+        }*/
         return true
     }
 }

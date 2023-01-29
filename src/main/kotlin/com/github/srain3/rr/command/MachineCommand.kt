@@ -153,6 +153,51 @@ object MachineCommand: CommandExecutor {
                     sender.sendMessage("[Machine] 引数が違います!")
                 }
             }
+            // DebugOnlyCommand
+            "debugCar" -> {
+                // debugCar TopSpeed Power Brake Momentum Yaw
+                if (args.size in 5..7) {
+                    val list = listOf(
+                        args[1].toIntOrNull(),
+                        args[2].toIntOrNull(),
+                        args[3].toIntOrNull(),
+                        args[4].toIntOrNull(),
+                        args[5].toIntOrNull()
+                    )
+                    val stringList = listOf(
+                        "TopSpeed: ",
+                        "Power: ",
+                        "Brake: ",
+                        "Momentum: ",
+                        "Handling: "
+                    )
+
+                    val minecartItem = ItemStack(Material.MINECART)
+                    val itemMeta = minecartItem.itemMeta?: return false
+                    val newLore = mutableListOf<String>()
+                    list.forEachIndexed { index, int ->
+                        if (int != null) {
+                            newLore.add(stringList[index] + "$int")
+                        }
+                    }
+                    itemMeta.lore = newLore
+                    itemMeta.setCustomModelData(831)
+                    minecartItem.itemMeta = itemMeta
+
+                    when (sender) {
+                        is Player -> {
+                            Event.spawnCar(sender.location.add(0.5,0.07,0.5), minecartItem, sender.eyeLocation.yaw, null, debug = true)
+                            sender.sendMessage("[Machine] Debug車を出しました")
+                        }
+                        else -> {
+                            sender.sendMessage("[Machine] Playerのみ受け付けます")
+                        }
+                    }
+
+                } else {
+                    sender.sendMessage("[Machine] 引数が違います!")
+                }
+            }
         }
         return true
     }

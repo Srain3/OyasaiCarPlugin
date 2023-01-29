@@ -50,7 +50,7 @@ object Event: Listener {
         player.inventory.itemInMainHand.amount = 0
     }
 
-    fun spawnCar(spawnLoc: Location, item: ItemStack, yaw: Float, owner: Player?) {
+    fun spawnCar(spawnLoc: Location, item: ItemStack, yaw: Float, owner: Player?, debug: Boolean = false) {
         val dropItem = spawnLoc.world?.spawnEntity(spawnLoc, EntityType.DROPPED_ITEM) as Item
         dropItem.itemStack = ItemStack(Material.SNOWBALL)
         dropItem.isSilent = true
@@ -65,7 +65,7 @@ object Event: Listener {
         val bossBar = Bukkit.createBossBar(nameSpacedKey, "| 000km/h |", BarColor.WHITE, BarStyle.SEGMENTED_10)
 
         val vehicleCar = convertCarStatus(getCarStatus(item.itemMeta!!))
-        val mainCar = MainCar(minecart, dropItem, bossBar, nameSpacedKey, vehicleCar, owner, item)
+        val mainCar = MainCar(minecart, dropItem, bossBar, nameSpacedKey, vehicleCar, owner, item, debug = debug)
         mainCarList.add(mainCar)
         mainCar.start()
     }

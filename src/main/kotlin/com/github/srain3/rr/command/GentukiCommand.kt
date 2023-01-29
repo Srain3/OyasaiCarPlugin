@@ -40,7 +40,7 @@ object GentukiCommand: CommandExecutor {
                     Event.spawnCar(player.location.add(0.5,0.07,0.5), minecartItem, player.eyeLocation.yaw, null)
                     player.sendMessage("[Machine] 原付を出しました(降りると消えます)")
                 } else {
-                    sender.sendMessage("[Machine] 存在しないプレイヤーです(ConsoleCommand:/gentuki)")
+                    sender.sendMessage("[Machine] 存在しないプレイヤーです(ConsoleCommand:/gentuki ${args[0]})")
                 }
             }
         }

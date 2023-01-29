@@ -38,14 +38,19 @@ data class MainCar(
 
     var exit: Boolean = false,
     var removeFlag: Boolean = false,
-    var deathLoc: Location = Location(null,0.0,0.0,0.0)
+    var deathLoc: Location = Location(null,0.0,0.0,0.0),
+    val debug: Boolean = false
 ) {
     /**
      * 開始の処理
      */
     fun start() {
         dropItem.addPassenger(minecart)
-        timerTask()
+        if (debug) {
+            timerDebugCarTask()
+        } else {
+            timerTask()
+        }
     }
 
     /**
@@ -119,9 +124,10 @@ data class MainCar(
                 val wasd = getWASD(player)
                 //player.sendMessage(wasd)
 
-                updateBar(vehicleCar.slipstream(minecart))
+                val slipstreamSwitch = vehicleCar.slipstream(minecart)
+                updateBar(slipstreamSwitch)
 
-                val speed = vehicleCar.controlSpeed(wasd)
+                val speed = vehicleCar.controlSpeed(wasd, slipstreamSwitch)
                 val addYaw = vehicleCar.handling(wasd)
                 val yaw = minecart.location.yaw + addYaw
 
@@ -286,7 +292,7 @@ data class MainCar(
         if(vehicleCar.speed.z.isNaN()) {
             vehicleCar.speed = Vector()
         }
-        val barPercent = vehicleCar.speed.z / vehicleCar.speedLimit
+        val barPercent = min(1.0, (vehicleCar.speed.z / vehicleCar.speedLimit))
         var speedString = (vehicleCar.speed.z * 100).roundToInt().toString()
         if (barPercent in -0.1..0.1) {
             bossBar.color = BarColor.WHITE
@@ -350,5 +356,112 @@ data class MainCar(
             bedrockBoat.updateRotation((minecart.location.yaw)+yaw,0F,bedrockBoat.isOnGround)
             JavaMoveVehicleTranslator().translate(session, ClientboundMoveVehiclePacket(x,y,z,bedrockBoat.yaw,pitch))
         }
+    }
+
+    /**
+     * Debug車コード
+     */
+    private fun timerDebugCarTask() {
+        object : BukkitRunnable() {
+            override fun run() {
+                if (minecart.isDead) {
+                    if (!exit) {
+                        exitTask()
+                    }
+                    object : BukkitRunnable() {
+                        override fun run() {
+                            deathLoc.world?.getNearbyEntities(deathLoc, 0.5,0.5,0.5) {
+                                it is Item
+                            }?.toSet()?.forEach {
+                                val item = (it as Item)
+                                if (item.itemStack.type == Material.MINECART) {
+                                    it.remove()
+                                }
+                            }
+                        }
+                    }.runTaskLater(ToolBox.plugin, 1)
+                    cancel() ; return
+                }
+
+                if (dropItem.isDead) {
+                    val newEntity = minecart.world.spawnEntity(minecart.location, EntityType.DROPPED_ITEM) as Item
+                    newEntity.itemStack = ItemStack(Material.SNOWBALL)
+                    newEntity.setGravity(false)
+                    newEntity.pickupDelay = Int.MAX_VALUE
+                    dropItem = newEntity
+
+                    dropItem.addPassenger(minecart)
+
+                    vehicleCar.speed.multiply(0.9)
+                }
+
+                val player = getControlPlayer()
+                updateBar()
+                updateBarPlayer(player)
+
+                if (player == null) {
+                    val speed = vehicleCar.controlSpeed(null)
+                    val addVec = speed.rotateAroundY(PI/180.0*-(minecart.location.yaw+90F))
+
+                    var jumpY = vehicleCar.jump(dropItem, minecart)
+                    if (jumpY == 0.0) {
+                        jumpY = vehicleCar.down(dropItem)
+                    }
+                    if (jumpY != 0.0) {
+                        addVec.y = jumpY
+                    }
+                    if(dropItem.velocity.z.isNaN()) {
+                        dropItem.velocity = Vector()
+                    }
+                    dropItem.velocity = addVec
+
+                    if (removeFlag) {
+                        exit = true
+                        exitTask()
+                    }
+                    return
+                }
+
+                if (owner == null) {
+                    removeFlag = true
+                }
+
+                val wasd = getWASD(player)
+                //player.sendMessage(wasd)
+
+                val slipstreamSwitch = player.isFlying
+                vehicleCar.slipstream(minecart, slipstreamSwitch)
+                updateBar(slipstreamSwitch)
+
+                val speed = vehicleCar.controlSpeed(wasd, slipstreamSwitch)
+                val addYaw = vehicleCar.handling(wasd)
+                val yaw = minecart.location.yaw + addYaw
+
+                brakeLamp(wasd, minecart.location.yaw)
+                minecart.setRotation(yaw, 0F)
+
+                //snowBall.velocity = speed.rotateAroundY(PI/180.0*-(yaw + 90F + vehicleCar.slip(wasd)))
+                val addVec = speed.rotateAroundY(PI/180.0*-(yaw + 90F + vehicleCar.slip(wasd)))
+
+                var jumpY = vehicleCar.jump(dropItem, minecart)
+                if (jumpY == 0.0) {
+                    jumpY = vehicleCar.down(dropItem)
+                }
+                if (jumpY != 0.0) {
+                    addVec.y = jumpY
+                }
+                if(dropItem.velocity.z.isNaN()) {
+                    dropItem.velocity = Vector()
+                }
+                dropItem.velocity = addVec
+
+                updateHeadLight(player)
+                smokeParticle(vehicleCar.speed.z, vehicleCar.slipAngle)
+
+                if (FloodgateApi.getInstance().isFloodgateId(player.uniqueId)) {
+                    bedRockConvert(player, addYaw)
+                }
+            }
+        }.runTaskTimer(ToolBox.plugin, 1, 1)
     }
 }

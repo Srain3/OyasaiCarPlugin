@@ -2,7 +2,7 @@ name: OyasaiCarPlugin
 author: Srain3
 main: com.github.srain3.rr.RealRacing
 api-version: 1.19
-version: "0.2.3"
+version: "0.2.4"
 
 depend:
   - floodgate
